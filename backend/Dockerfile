@@ -7,8 +7,11 @@ RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt
 
 COPY package*.json ./
 
-# Install dependencies and rebuild native modules from source
-RUN npm install --production --build-from-source
+# Clean install and rebuild all native modules
+RUN rm -rf node_modules package-lock.json && \
+    npm cache clean --force && \
+    npm install --production && \
+    npm rebuild
 
 COPY . .
 
