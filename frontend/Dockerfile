@@ -8,6 +8,9 @@ RUN npm install
 
 COPY . .
 
+# Set API URL for production
+ENV REACT_APP_API_URL=http://ai-coder.gleuhr.com/api
+
 RUN npm run build
 
 FROM nginx:alpine
