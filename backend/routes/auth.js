@@ -63,29 +63,39 @@ router.post('/register', async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
   try {
+    console.log('[L1] Login started');
     const { email, password } = req.body;
 
+    console.log('[L2] Validating input');
     // Validate input
     if (!email || !password) {
       return res.status(400).json({ error: 'Please provide email and password' });
     }
 
+    console.log('[L3] Finding user');
     // Find user
     const user = await User.findOne({ email });
     if (!user) {
+      console.log('[L4] User not found');
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    console.log('[L5] Comparing password');
     // Check password
     const isMatch = await user.comparePassword(password);
+    console.log('[L6] Password comparison complete, match:', isMatch);
+
     if (!isMatch) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    console.log('[L7] Updating last login');
     // Update last login
     user.lastLogin = new Date();
     await user.save();
+    console.log('[L8] Last login updated');
 
+    console.log('[L9] Creating JWT token');
     // Create token
     const token = jwt.sign(
       { userId: user._id, username: user.username },
@@ -93,6 +103,7 @@ router.post('/login', async (req, res) => {
       { expiresIn: '7d' }
     );
 
+    console.log('[L10] Sending response');
     res.json({
       message: 'Login successful',
       token,
@@ -102,6 +113,7 @@ router.post('/login', async (req, res) => {
         email: user.email
       }
     });
+    console.log('[L11] Login response sent successfully');
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Error logging in' });
