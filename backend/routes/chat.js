@@ -36,7 +36,7 @@ const getSystemPrompt = (projectType, language) => {
 };
 
 // Chat endpoint
-router.post('/message', authMiddleware, async (req, res) => {
+router.post('/message', async (req, res) => {
   try {
     const { message, projectId, projectType, language, conversationHistory } = req.body;
 
@@ -67,10 +67,7 @@ router.post('/message', authMiddleware, async (req, res) => {
     // Save conversation to project if projectId provided
     if (projectId) {
       try {
-        const project = await Project.findOne({
-          _id: projectId,
-          userId: req.user.userId
-        });
+        const project = await Project.findById(projectId);
 
         if (project) {
           project.conversations.push({
@@ -109,7 +106,7 @@ router.post('/message', authMiddleware, async (req, res) => {
 });
 
 // Stream chat endpoint for real-time responses
-router.post('/stream', authMiddleware, async (req, res) => {
+router.post('/stream', async (req, res) => {
   try {
     const { message, projectType, language, conversationHistory } = req.body;
 

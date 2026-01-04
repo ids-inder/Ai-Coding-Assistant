@@ -1,12 +1,11 @@
 const express = require('express');
-const authMiddleware = require('../middleware/auth');
 const Project = require('../models/Project');
 const router = express.Router();
 
-// Get all projects for user
-router.get('/', authMiddleware, async (req, res) => {
+// Get all projects
+router.get('/', async (req, res) => {
   try {
-    const projects = await Project.find({ userId: req.user.userId })
+    const projects = await Project.find()
       .select('-conversations -files')
       .sort({ updatedAt: -1 });
 
@@ -18,12 +17,9 @@ router.get('/', authMiddleware, async (req, res) => {
 });
 
 // Get single project
-router.get('/:id', authMiddleware, async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
-    const project = await Project.findOne({
-      _id: req.params.id,
-      userId: req.user.userId
-    });
+    const project = await Project.findById(req.params.id);
 
     if (!project) {
       return res.status(404).json({ error: 'Project not found' });
@@ -37,7 +33,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
 });
 
 // Create project
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { name, description, projectType, language } = req.body;
 
@@ -46,7 +42,7 @@ router.post('/', authMiddleware, async (req, res) => {
     }
 
     const project = new Project({
-      userId: req.user.userId,
+      userId: 'anonymous', // No authentication
       name,
       description,
       projectType,
@@ -66,12 +62,12 @@ router.post('/', authMiddleware, async (req, res) => {
 });
 
 // Update project
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     const { name, description, projectType, language } = req.body;
 
-    const project = await Project.findOneAndUpdate(
-      { _id: req.params.id, userId: req.user.userId },
+    const project = await Project.findByIdAndUpdate(
+      req.params.id,
       { name, description, projectType, language },
       { new: true }
     );
@@ -91,12 +87,9 @@ router.put('/:id', authMiddleware, async (req, res) => {
 });
 
 // Delete project
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
-    const project = await Project.findOneAndDelete({
-      _id: req.params.id,
-      userId: req.user.userId
-    });
+    const project = await Project.findByIdAndDelete(req.params.id);
 
     if (!project) {
       return res.status(404).json({ error: 'Project not found' });
@@ -110,14 +103,11 @@ router.delete('/:id', authMiddleware, async (req, res) => {
 });
 
 // Add file to project
-router.post('/:id/files', authMiddleware, async (req, res) => {
+router.post('/:id/files', async (req, res) => {
   try {
     const { name, content, language } = req.body;
 
-    const project = await Project.findOne({
-      _id: req.params.id,
-      userId: req.user.userId
-    });
+    const project = await Project.findById(req.params.id);
 
     if (!project) {
       return res.status(404).json({ error: 'Project not found' });
