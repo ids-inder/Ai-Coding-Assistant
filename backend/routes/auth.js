@@ -6,19 +6,24 @@ const router = express.Router();
 // Register
 router.post('/register', async (req, res) => {
   try {
+    console.log('[1] Registration started');
     const { username, email, password } = req.body;
 
+    console.log('[2] Validating input');
     // Validate input
     if (!username || !email || !password) {
       return res.status(400).json({ error: 'Please provide all required fields' });
     }
 
+    console.log('[3] Checking existing user');
     // Check if user already exists
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
+      console.log('[4] User already exists, returning error');
       return res.status(400).json({ error: 'User already exists' });
     }
 
+    console.log('[5] Creating new user object');
     // Create new user
     const user = new User({
       username,
@@ -26,8 +31,11 @@ router.post('/register', async (req, res) => {
       password
     });
 
+    console.log('[6] Saving user to database');
     await user.save();
+    console.log('[7] User saved successfully');
 
+    console.log('[8] Creating JWT token');
     // Create token
     const token = jwt.sign(
       { userId: user._id, username: user.username },
@@ -35,6 +43,7 @@ router.post('/register', async (req, res) => {
       { expiresIn: '7d' }
     );
 
+    console.log('[9] Sending response');
     res.status(201).json({
       message: 'User registered successfully',
       token,
@@ -44,6 +53,7 @@ router.post('/register', async (req, res) => {
         email: user.email
       }
     });
+    console.log('[10] Response sent successfully');
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({ error: 'Error registering user' });
