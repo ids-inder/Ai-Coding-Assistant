@@ -1,12 +1,9 @@
-version: '3.8'
-
 services:
   mongodb:
     image: mongo:7.0
     container_name: ai-coder-mongodb
     restart: always
-    ports:
-      - "27017:27017"
+    # Don't expose MongoDB port externally to avoid conflicts
     volumes:
       - mongodb_data:/data/db
     environment:
@@ -19,7 +16,7 @@ services:
     container_name: ai-coder-backend
     restart: always
     ports:
-      - "5000:5000"
+      - "5001:5000"
     environment:
       - NODE_ENV=production
       - MONGODB_URI=mongodb://mongodb:27017/ai-coding-assistant
@@ -39,7 +36,7 @@ services:
     container_name: ai-coder-frontend
     restart: always
     ports:
-      - "3000:80"
+      - "3001:80"
     depends_on:
       - backend
 
