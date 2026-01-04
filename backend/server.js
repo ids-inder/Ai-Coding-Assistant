@@ -15,6 +15,9 @@ const app = express();
 // Connect to Database
 connectDB();
 
+// Trust proxy (for rate limiting behind nginx)
+app.set('trust proxy', 1);
+
 // Security Middleware
 app.use(helmet());
 app.use(cors({
